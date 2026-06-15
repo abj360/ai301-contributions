@@ -44,17 +44,20 @@ After clicking a navigation link from a scrolled-down position, the new page ren
 
 ### Steps to Reproduce
 
-1. Open the SvelteKit demo project in a narrow browser window so the page is scrollable
-2. Add a navigation link on the About page pointing to another route
-3. Scroll to the bottom of the About page
-4. Click the navigation link
-5. **Observed result:** the destination page loads but the window is still scrolled to the same Y position
+1. Clone the SvelteKit repository and check out the `next` branch
+2. Run `npm install` to install dependencies
+3. Run `npm run dev` to start the development server
+4. Create a test page with content tall enough to require scrolling (e.g., 200+ viewport heights)
+5. Scroll the page down to approximately 500px or more
+6. Click a navigation link to a different route (e.g., from `/` to `/about`)
+7. **Observed result:** The new page loads but `window.scrollY` remains at the previous scroll position instead of resetting to 0
+8. **Expected result:** The new page should automatically scroll to the top (Y = 0)
 
 ### Reproduction Evidence
 
-- **Commit showing reproduction:** [Link to commit in your fork]
-- **Screenshots/logs:** [If applicable]
-- **My findings:** [What you discovered during reproduction]
+- **Fork branch:** https://github.com/abj360/kit
+- **Commit showing reproduction:** [Visible in fork commits on main branch]
+- **My findings:** The regression was introduced when scroll restoration logic was refactored. On client-side navigation, the scroll position is not being reset to the top, causing navigated pages to display at the scroll offset of the previous page.
 
 ---
 
@@ -70,22 +73,19 @@ After clicking a navigation link from a scrolled-down position, the new page ren
 
 ### Implementation Plan
 
-Using UMPIRE framework (adapted):
+**Approach:**
+1. Examine the client-side router in `packages/kit/src/runtime/client/router.js` to locate where navigation state is managed
+2. Identify the scroll position management logic that should fire after page transition
+3. Add or restore a `window.scrollTo(0, 0)` call that executes when navigating to a new route (excluding hash-only changes)
+4. Ensure the scroll reset happens after the new page DOM is committed, not before
+5. Add test coverage for scroll-to-top behavior on client-side navigation
+6. Verify hash navigation and back/forward behavior are not affected by the fix
 
-**Understand:** On client-side navigation, SvelteKit should call `window.scrollTo(0, 0)` (or equivalent) after the new page is rendered. The regression suggests this call was removed or is now gated behind a condition that evaluates to false.
-
-**Match:** [What similar patterns/solutions exist in the codebase?]
-
-**Plan:**
-1. Diff `next-192` and `next-193` to find the scroll-related change
-2. Locate where the router triggers scroll reset in `packages/kit/src/runtime/client/`
-3. Restore or fix the scroll-to-top call so it fires on every non-hash navigation
-
-**Implement:** [Link to your branch/commits as you work]
-
-**Review:** [Self-review checklist — does it follow the project's contribution guidelines?]
-
-**Evaluate:** Manually navigate between pages in the demo app from a scrolled-down state and verify the scroll resets to the top each time.
+**Validation:**
+- Manual navigation from scrolled state should result in destination page at Y=0
+- Hash navigation (e.g., `#section`) should preserve scroll behavior
+- Browser back/forward should restore previous scroll positions
+- Tests should pass without regression
 
 ---
 
