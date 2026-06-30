@@ -551,33 +551,25 @@ The implementation leverages existing pwndbg infrastructure:
 
 ## Pull Request
 
-**Status:** Ready for upstream merge
+**Status:** Submitted for Review
 
-**PR Details (if needed):**
+**PR Link:** https://github.com/pwndbg/pwndbg/pull/3991
 
-If submitting as PR to pwndbg:
+**PR Summary:**
+The `u` command (alias for `nearpc`, used to disassemble memory) now supports GDB-style command repetition. When a user presses Enter without typing a new command, the disassembly continues from where it left off, showing the next set of instructions instead of repeating the same range.
 
-```
-Title: Add command repeat support for u command
+**PR Details:**
+- **Title:** Add command repeat support for u command
+- **Base branch:** dev
+- **Commits:** 1 (3d001640)
+- **Changes:** 4 lines in `pwndbg/commands/nearpc.py` (attribute initialization)
+- **References:** Closes #1374
 
-Body:
-Fixes #1374
-
-## Summary
-The `u` command (alias for `nearpc`, used to disassemble memory) now supports GDB-style command repetition. When a user presses Enter without typing a new command, the disassembly continues from where it left off, showing the next set of instructions.
-
-## Changes
-- Initialize `nearpc.repeat` attribute in `pwndbg/commands/nearpc.py`
-- Existing repeat logic in `pwndbg/aglib/nearpc.py` now functions properly
-
-## Testing
-- ✓ Manual verification: `u` command repeats correctly on Enter
-- ✓ `emulate` command (which depends on nearpc.repeat) still works
-- ✓ No regressions in other commands
-
-## Implementation Notes
-This fix initializes the `nearpc.repeat` attribute at module load time, matching the pattern used in other repeat-supporting commands like `hexdump`. The repeat detection and handling logic was already implemented in `aglib/nearpc.py`; this change simply ensures the attribute exists when accessed.
-```
+**Key Points in PR:**
+- Minimal, focused fix (4 lines of initialization code)
+- Follows existing patterns from `hexdump` command
+- No unrelated changes
+- Leverages existing framework infrastructure for repeat detection
 
 ---
 
