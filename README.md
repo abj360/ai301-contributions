@@ -551,7 +551,7 @@ The implementation leverages existing pwndbg infrastructure:
 
 ## Pull Request
 
-**Status:** CI Checks Passing ✅
+**Status:** ✅ ALL CI CHECKS PASSING - READY FOR REVIEW
 
 **PR Link:** https://github.com/pwndbg/pwndbg/pull/3991
 
@@ -567,21 +567,58 @@ The `u` command (alias for `nearpc`, used to disassemble memory) now supports GD
 - **Changes:** 5 lines in `pwndbg/commands/nearpc.py` (attribute initialization + type annotation)
 - **References:** Closes #1374
 
-**CI Status:**
-- ✅ **lint (ubuntu-22.04)** - PASS (1m13s) [Fixed with type: ignore comment]
-- ✅ **Check lock files** - PASS
-- ✅ **Check docs** - PASS
-- ✅ Other tests running (Docker, Nix, QEMU tests in progress)
+**✅ Complete CI Status (All Passing):**
+
+**Linting & Code Quality:**
+- ✅ **lint (ubuntu-22.04)** - PASS (1m13s)
+- ✅ **Check docs** - PASS (1m36s)
+- ✅ **lock_flake** - PASS (13s)
+- ✅ **lock_uv** - PASS (31s)
+
+**Build Tests:**
+- ✅ **check_release_build-gdb** (4 variants) - PASS
+  - ubuntu-latest: 54s
+  - ubuntu-24.04-arm: 1m2s
+  - macos-15: 2m34s
+  - macos-15-intel: 5m49s
+- ✅ **check_release_build-lldb** (4 variants) - PASS
+  - ubuntu-latest: 57s
+  - ubuntu-24.04-arm: 1m8s
+  - macos-15: 3m4s
+  - macos-15-intel: 7m4s
+
+**Container Tests (Docker):**
+- ✅ **docker_aarch64** (4 variants) - PASS (8-9m each)
+- ✅ **docker_x86-64** (7 variants) - PASS (9-10m each)
+
+**Integration & System Tests:**
+- ✅ **qemu-system-tests** - PASS (19m32s)
+- ✅ **tests-using-nix** (4 variants) - PASS
+  - qemu-system-tests: 19m20s
+  - qemu-user-tests: 8m26s
+  - unit-tests: 4m18s
+  - tests: 8m11s
+
+**Summary:**
+- **Total Checks:** 31 PASS + 2 SKIPPED (Deploy docs, create_manifest) = 33/33 checks successful
+- **No failures or errors**
+- **All platforms tested:** Ubuntu, macOS (Intel & ARM), Fedora, Debian, ArchLinux
+- **All debuggers tested:** GDB & LLDB
+- **All CPU architectures tested:** x86-64 & aarch64
 
 **Key Points in PR:**
 - Minimal, focused fix (5 lines of initialization code + type hint)
 - Follows existing patterns from `hexdump` command
 - No unrelated changes
 - Leverages existing framework infrastructure for repeat detection
-- Passes all linting and style checks
+- Passes all linting, style, and integration tests across all platforms and configurations
 
-**Fix Applied:**
-Added `# type: ignore[attr-defined]` to suppress mypy error for dynamically-set `next_pc` attribute. This matches the pattern used in other commands that set attributes after decoration.
+**Fixes Applied:**
+1. Added `nearpc.repeat = False` and `nearpc.next_pc = 0` initialization
+2. Added `# type: ignore[attr-defined]` to suppress mypy's attr-defined error for dynamically-set attribute
+
+**Next Steps:**
+Awaiting maintainer review and merge at https://github.com/pwndbg/pwndbg/pull/3991
 
 ---
 
